@@ -14,4 +14,10 @@ PERMISSIONS: dict[str, frozenset[Role]] = {
 
 
 def require(caller: Caller, action: str) -> None:
-    raise NotImplementedError
+    """校验调用方是否有权执行动作，越权直接拒绝。"""
+    allowed = PERMISSIONS.get(action, frozenset())
+    if caller.role not in allowed:
+        raise ReleaseError(
+            ReasonCode.PERMISSION_DENIED,
+            f"caller={caller.caller_id} role={caller.role.value} 无权执行 {action}",
+        )
